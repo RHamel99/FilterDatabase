@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "filter-database"
+  },
+  "targets": {
+    "filter-database": {
+      "hosting": {
+        "filter-database": [
+          "filter-database"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

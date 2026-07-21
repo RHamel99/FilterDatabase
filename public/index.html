@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/dygraphs@2.2.1/dist/dygraph.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.css@8.1.0/themes/reset-min.css" integrity="sha256-2AeJLzExpZvqLUxMfcs+4DWcMwNfpnjUeAAvEtPr0wU=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  </head>
+  <body>
+    <header id='filter-database'>
+      <div id='sticky-header'>
+        <div id="logocontainer">
+          <a href="https://www.rapidspectralsolutions.com" target="_blank">
+            <img id="logo" src="RSS.png">
+          </a>
+        </div>
+        <div class="menu" id="menu">
+          <a href="javascript:void(0);" class="icon" onclick="myFunction()">
+            <i class="fa fa-bars"></i>
+          </a>
+          <div id="advSearchmenu" class="menucontent">
+            <button id="advSearchButton" onclick="openMenu()" class="dropdown">
+              Filter Search
+            </button>
+            <div id="advSearch" class="dropdown-content">
+              <div id="refinementSelection">
+                <input type="checkbox" id="All-Toggle" checked="true" onclick="toggleAll()"><div id="All-Label" class="Label">All</div>
+                <input type="checkbox" id="CWL-Toggle" class="reftoggle bp" checked="true"><div id="CWL-Label" class="Label">CWL:</div><div id="CWL-Refinement" class="Refinement bps"></div>
+                <input type="checkbox" id="HBW-Toggle" class="reftoggle bp" checked="true"><div id="HBW-Label" class="Label">FWHM:</div><div id="HBW-Refinement" class="Refinement bps"></div>
+                <span>or</span>
+                <input type="checkbox" id="COn-Toggle" class="reftoggle cut" checked="true"><div id="COn-Label" class="Label">Cut-On:</div><div id="COn-Refinement" class="Refinement cuts"></div>
+                <input type="checkbox" id="COff-Toggle" class="reftoggle cut" checked="true"><div id="COff-Label" class="Label">Cut-Off:</div><div id="COff-Refinement" class="Refinement cuts"></div>
+                <input type="checkbox" id="Angle-Toggle" class="reftoggle cut" checked="true"><div id="Angle-Label" class="Label">AOI:</div><div id="Angle-Refinement" class="Refinement cuts"></div>
+              </div><br>
+              <div id="toggle"></div>
+              <div id="sputtered"></div><br>
+              <div id="current-refinements" style="text-align: left;"></div>
+              <div id="refinementsmenu" style="text-align: right; position: absolute; bottom: 0; right:0; padding: 10px;">
+                <div id="stats"></div>
+                <div id="clear"></div>
+              </div>
+            </div>
+          </div>
+          <div id="smplSearchmenu" class="menucontent">
+            <button id="smplSearchButton" class="dropdown" onclick="searchDrop()">
+              Part Lookup
+            </button>
+            <div id="smplSearch" class="dropdown-content">
+              <div id='searchbox' style="text-align: center;"></div>
+              <p>Part Lookup is intended for <i>exact</i> filter names only</p>
+            </div>
+          </div>
+          <div id="graphmenu" class="menucontent">
+            <button id="graphButton" class="dropdown" onclick="graphDrop()">
+              Graph Settings
+            </button>
+            <div id="graphsettings" class="dropdown-content">
+              Enable/Disable Graphs Here
+              <div id="graphselect"></div>
+            </div>
+          </div>
+          <div id="infomenu" class="menucontent">
+            <button id="infoButton" class="dropdown" onclick="infoDrop()">
+              More Info
+            </button>
+            <div id="info" class="dropdown-content">
+              <b>Additional Information</b>
+              <ul>
+                <li>RSS has the capability to cut down filters to your required size</li><br>
+                <li>RSS cannot guarantee the transmissions or blocking shown -<br>please <a href="https://www.rapidspectralsolutions.com/contact">contact us</a> to check a filter for you</li>
+              </ul>
+            </div>
+          </div>
+          <div id="helpmenu" class="menucontent">
+            <button id="helpbutton" class="dropdown" onclick="openHelp()">
+              Help
+            </button>
+            <div id="help" class="dropdown-content">
+              <p>RSS Filter Database is a WIP. Please contact the developer with any questions/concerns.</p>
+              <a href="mailto:rhamel@rapidspectralsolutions.com">rhamel@rapidspectralsolutions.com</a>
+              <p>Your feedback is appreciated!</p>
+              <p>Controls:<br><b>Graph:</b> Click Filter Name<br><b>Zoom:</b> Click+Drag<br><b>Reset Zoom:</b> Double-Click<br><b>More Options:</b> Right-Click</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+    <div id="divs" style="position: relative; height: 100%;">
+      <div id="filtercontents">
+        <div id="dropZone"></div>
+        <div id="innerdiv">
+          <div id="selections">
+            <div id="filtersexpand">
+              Sort:<div id="sort-by"></div><br>
+              <div id="popup-container"><p>Filter typeⁱ</p>
+                <div id="popup-content">
+                  Most common filters:<br>
+                  BP = Bandpass<br>
+                  LP = Long Pass<br>
+                  SP = Short Pass<br><br>
+                  Prefixes:<br>
+                  H = Hard-Coated (Sputtered)<br>
+                  DR,DC = Dichroic<br><br>
+                  AF and DF are variants of BP<br><br>
+                  Our full glossary can be viewed <a href="https://www.rapidspectralsolutions.com/glossary" target="_blank">here.</a>
+                </div>
+              </div>
+              <div id="refinement-list"></div>
+              <div id="filterdata">
+                <br><p>Data Shown</p>
+                <input type="checkbox" class="datafilter" id="typefilter" checked><span> Filter Type</span><br>
+                <input type="checkbox" class="datafilter" id="cwlfilter" checked><span> CWL</span><br>
+                <input type="checkbox" class="datafilter" id="fwhmfilter" checked><span> FWHM</span><br>
+                <input type="checkbox" class="datafilter" id="confilter" checked><span> Cut-On</span><br>
+                <input type="checkbox" class="datafilter" id="cofffilter" checked><span> Cut-Off</span><br>
+                <input type="checkbox" class="datafilter" id="aoifilter"><span> AOI</span><br>
+                <input type="checkbox" class="datafilter" id="maxtfilter"><span> MaxT</span><br>
+                <input type="checkbox" class="datafilter" id="shapefilter"><span> Shape</span><br>
+                <input type="checkbox" class="datafilter" id="sizefilter"><span> Size</span><br>
+              </div>
+            </div>
+            <button id="filtersbutton" onclick="filterExpand()">></button>
+          </div>
+          <div id="graph" style="width: 100%;"></div>
+        </div>
+      </div>
+      <div id="contents">
+        <div id='hits' style="position: relative; overflow-y: scroll; height: 89vh; margin-left: 5px;"><br></div>
+      </div>
+    </div>
+    <div id="contextMenu" class="context-menu" style="display:none">
+      <ul>
+        <li id='addtograph'>
+          <a>Add to Graph</a>
+        </li>
+        <li id="downloadcsv">
+          <a>Download CSV</a>
+        </li>
+        <a id="DL" style="display: none;"></a>
+        <li id="moreinfo">
+          <a>More Info</a>
+        </li>
+      </ul>
+    </div>
+    <div id="contextMenuGraph" class="context-menu" style="display:none">
+      <ul>
+        <li id='downloadpng'>
+          <a>Download PNG</a>
+        </li>
+        <a id="DLPNG" style="display: none;"></a>
+        <li id='copylink'>
+          <a>Copy Link</a>
+        </li>
+      </ul>
+    </div>
+    <div id="root"></div>
+    <script>
+      function myFunction() {
+        var x = document.querySelectorAll(".menucontent");
+        x.forEach(el => {
+          el.classList.toggle('showham');
+        })
+      }
+      function openMenu() {
+        document.getElementById("advSearch").classList.toggle("show");
+      }
+      function searchDrop() {
+        $(".ais-SearchBox-reset").click();
+        document.getElementById("smplSearch").classList.toggle("show");
+      }
+      function graphDrop() {
+        document.getElementById("graphsettings").classList.toggle("show");
+      }
+      function infoDrop() {
+        document.getElementById("info").classList.toggle("show");
+      }
+      function openHelp() {
+        document.getElementById("help").classList.toggle("show");
+      }
+      function filterExpand() {
+        $('#filtersexpand').toggle()
+        if ($('#filtersexpand').is(':hidden')){
+          $('#filtersbutton').text('>');
+        } else {
+          $('#filtersbutton').text('<');
+        }
+      }
+      function toggleAll() {
+        if ($('.reftoggle:checked').length == 0){
+          $('.reftoggle').click()
+        } else{
+          $('.reftoggle:checked').click()
+        }
+      }
+      window.addEventListener('click', function(e){   
+        if (!((document.getElementById('advSearch').contains(e.target))||(document.getElementById('advSearchButton').contains(e.target))||(e.target.matches('.ais-CurrentRefinements-delete')))) {
+          var openDropdown = document.getElementById('advSearch');
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+        if (!((document.getElementById('graphsettings').contains(e.target))||(document.getElementById('graphButton').contains(e.target)))) {
+          var openDropdown = document.getElementById('graphsettings');
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+        if (!((document.getElementById('info').contains(e.target))||(document.getElementById('infoButton').contains(e.target)))) {
+          var openDropdown = document.getElementById('info');
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+        if (!((document.getElementById('help').contains(e.target))||(document.getElementById('helpbutton').contains(e.target)))) {
+          var openDropdown = document.getElementById('help');
+          if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+          }
+        }
+      });
+      $('.datafilter').each(function(){
+        $(this).on("click",function(){
+          if($(this).prop('checked')){
+            $('#no'+this.id.split("filter")[0]).remove();
+          } else{
+            $(`<style id='no${this.id.split("filter")[0]}'>.${this.id.split("filter")[0]} { display:none }</style>`)
+      .appendTo(document.documentElement);
+          }
+        })
+      });
+    </script>
+  </body>
+  <style id="nomaxt">.maxt {display: none;}</style>
+  <style id="noaoi">.aoi {display: none;}</style>
+  <style id="noshape">.shape {display: none;}</style>
+  <style id="nosize">.size {display: none;}</style>
+</html>
