@@ -9,6 +9,7 @@
     "algoliasearch": "^4.23.3",
     "d3": "^7.9.0",
     "dygraphs": "^2.2.1",
+    "firebase": "^12.16.0",
     "html2canvas": "^1.4.1",
     "instantsearch.css": "^8.1.0",
     "instantsearch.js": "^4.66.0",
